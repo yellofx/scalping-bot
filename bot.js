@@ -374,7 +374,8 @@ const CSV_FILE = "trades.csv";
 // Always ensure trades.csv exists with headers — open it in Excel/Sheets any time
 function initCsv() {
   if (!existsSync(CSV_FILE)) {
-    writeFileSync(CSV_FILE, CSV_HEADERS + "\n");
+    const funnyNote = `,,,,,,,,,,,"NOTE","Hey, if you're at this stage of the video, you must be enjoying it... perhaps you could hit subscribe now? :)"`;
+    writeFileSync(CSV_FILE, CSV_HEADERS + "\n" + funnyNote + "\n");
     console.log(
       `📄 Created ${CSV_FILE} — open in Google Sheets or Excel to track trades.`,
     );
