@@ -1,50 +1,62 @@
 {
-  "watchlist": ["BTCUSDT"],
-  "default_timeframe": "1m",
+  "watchlist": ["SPXUSDT"],
+  "default_timeframe": "5m",
 
   "strategy": {
-    "name": "VWAP + RSI(3) + EMA(8) Scalping Strategy",
-    "sources": ["Lewis Jackson"],
-    "description": "Three indicators, each doing a different job. EMA(8) for trend direction, VWAP for session bias, RSI(3) for entry timing. All three must align before a trade fires."
+    "name": "David Paul Swing Trading Strategy",
+    "sources": ["David Paul"],
+    "description": "Top-Down Swing-Strategie auf 30-Minuten-Chart. EMA(21), EMA(55), SMA(89) müssen positiv aufgefächert sein (Bow Tie). Rücksetzer bei austrocknendem Volumen kaufen. 50/50-Exit mit Trailing Stop. 1% Risiko pro Trade."
   },
 
   "indicators": {
-    "ema_8": "Trend direction. Price above EMA(8) = bullish momentum. Below = bearish.",
-    "vwap": "Session bias. Price above VWAP = buyers in control. Below = sellers. Resets at midnight UTC.",
-    "rsi_3": "Entry timing. RSI on 3 candles only — extremely sensitive. Below 30 in an uptrend = snap-back setup. Above 70 in a downtrend = reversal likely."
+    "ema_21": "Kurzfristiger Trend. Muss über EMA(55) liegen.",
+    "ema_55": "Mittelfristiger Trend. Muss über SMA(89) liegen.",
+    "sma_89": "Langfristiger Trend-Anker. Alle drei Linien müssen positiv aufgefächert sein (Bow Tie).",
+    "volume": "Steigt bei Aufwärtsbewegung, muss beim Rücksetzer austrocknen (unter 20-Perioden-Durchschnitt)."
   },
 
   "bias_criteria": {
-    "bullish": ["Price is above VWAP", "Price is above EMA(8)"],
-    "bearish": ["Price is below VWAP", "Price is below EMA(8)"]
+    "bullish": [
+      "EMA(21) liegt über EMA(55)",
+      "EMA(55) liegt über SMA(89)",
+      "Bow Tie Formation bestätigt — alle drei Linien fächern aufwärts",
+      "Preis liegt über EMA(21)"
+    ],
+    "bearish": [
+      "EMA(21) liegt unter EMA(55)",
+      "EMA(55) liegt unter SMA(89)",
+      "Preis liegt unter EMA(21)"
+    ]
   },
 
   "entry_rules": {
     "long": [
-      "Price is above VWAP — buyers in control for the session",
-      "Price is above EMA(8) — uptrend confirmed",
-      "RSI(3) has dropped below 30 — short-term pullback in an uptrend, snap-back likely"
+      "Bow Tie bestätigt: EMA(21) > EMA(55) > SMA(89)",
+      "Preis liegt über EMA(21) — Aufwärtstrend intakt",
+      "Preis hat zurückgesetzt (innerhalb 2% von EMA(21))",
+      "Volumen der letzten 3 Kerzen liegt unter dem 20-Perioden-Durchschnittsvolumen (Volumen trocknet aus)"
     ],
     "short": [
-      "Price is below VWAP — sellers in control",
-      "Price is below EMA(8) — downtrend confirmed",
-      "RSI(3) has spiked above 70 — overbought in a downtrend, reversal likely"
+      "Bow Tie invertiert: EMA(21) < EMA(55) < SMA(89)",
+      "Preis liegt unter EMA(21) — Abwärtstrend bestätigt",
+      "Preis hat zurückgesetzt (innerhalb 2% von EMA(21) von unten)",
+      "Volumen der letzten 3 Kerzen liegt unter dem 20-Perioden-Durchschnittsvolumen (Volumen trocknet aus)"
     ]
   },
 
   "exit_rules": [
-    "Exit when RSI(3) crosses back above 50 (for longs) or below 50 (for shorts)",
-    "Hard stop: 0.3% below entry for longs, 0.3% above entry for shorts",
-    "Take profit at next VWAP touch or EMA(8) cross"
+    "50/50-Methode: halbe Position verkaufen wenn Gewinn = anfängliches Risiko (1:1 RRR)",
+    "Stop-Loss nach erstem Teilverkauf auf Einstandspreis nachziehen (Breakeven)",
+    "Zweite Hälfte mit Trailing Stop unter jedem neuen Swing-Tief absichern",
+    "Sofortiger Ausstieg wenn Preis unter SMA(89) schließt — Trend gebrochen"
   ],
 
   "risk_rules": [
-    "Risk maximum 1% of portfolio per trade",
-    "Maximum trade size capped by MAX_TRADE_SIZE_USD in .env",
-    "Maximum trades per day capped by MAX_TRADES_PER_DAY in .env",
-    "Do not trade if price is more than 1.5% away from VWAP — overextended",
-    "Paper trade first — validate this strategy on your specific asset before going live"
+    "Maximal 1% des Portfolios riskieren pro Trade",
+    "Stop-Loss unterhalb des Rücksetzer-Tiefs oder unter EMA(55)",
+    "Maximum Trade-Größe begrenzt durch MAX_TRADE_SIZE_USD in .env",
+    "Maximum Trades pro Tag begrenzt durch MAX_TRADES_PER_DAY in .env"
   ],
 
-  "notes": "Scalping strategy — designed for 1m to 5m timeframes. RSI(3) is intentionally fast and sensitive. Do not apply to higher timeframes."
+  "notes": "30-Minuten-Chart. Bow Tie (EMA21 > EMA55 > SMA89) ist primärer Trendfilter. Rücksetzer bei austrocknendem Volumen kaufen. Konfiguriert für SPXUSDT auf BitGet."
 }
