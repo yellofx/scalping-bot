@@ -23,46 +23,39 @@ function checkOnboarding() {
   const required = ["BITGET_API_KEY", "BITGET_SECRET_KEY", "BITGET_PASSPHRASE"];
   const missing = required.filter((k) => !process.env[k]);
 
-  if (!existsSync(".env")) {
-    console.log("\n⚠️  No .env file found — opening it for you to fill in...\n");
-    writeFileSync(
-      ".env",
-      [
-        "# BitGet credentials",
-        "BITGET_API_KEY=",
-        "BITGET_SECRET_KEY=",
-        "BITGET_PASSPHRASE=",
-        "",
-        "# Trading config",
-        "PORTFOLIO_VALUE_USD=700",
-        "MAX_TRADES_PER_DAY=24",
-        "PAPER_TRADING=true",
-        "SYMBOL=SPXUSDT",
-        "TIMEFRAME=3m",
-        "BIAS_TIMEFRAME=15m",
-        "",
-        "# Scalping risk config",
-        "CAPITAL_PCT=0.9",
-        "SL_PCT=0.15",
-        "MAX_SL_PCT=0.5",
-        "LEVERAGE=50",
-      ].join("\n") + "\n",
-    );
-    try { execSync("open .env"); } catch {}
-    console.log("Fill in your BitGet credentials in .env then re-run: node bot.js\n");
-    process.exit(0);
-  }
-
+  // Wenn alle Pflicht-Vars gesetzt sind, kein .env nötig (z.B. Railway)
   if (missing.length > 0) {
-    console.log(`\n⚠️  Missing credentials in .env: ${missing.join(", ")}`);
-    try { execSync("open .env"); } catch {}
-    console.log("Add the missing values then re-run: node bot.js\n");
+    // Nur lokal: .env erstellen und öffnen
+    if (!existsSync(".env")) {
+      console.log("\n⚠️  No .env file found — creating template...\n");
+      writeFileSync(
+        ".env",
+        [
+          "# BitGet credentials",
+          "BITGET_API_KEY=",
+          "BITGET_SECRET_KEY=",
+          "BITGET_PASSPHRASE=",
+          "",
+          "# Trading config",
+          "PORTFOLIO_VALUE_USD=700",
+          "MAX_TRADES_PER_DAY=24",
+          "PAPER_TRADING=true",
+          "SYMBOL=SPXUSDT",
+          "TIMEFRAME=3m",
+          "",
+          "# Scalping risk config",
+          "CAPITAL_PCT=0.9",
+          "SL_PCT=0.15",
+          "MAX_SL_PCT=0.5",
+          "LEVERAGE=50",
+        ].join("\n") + "\n",
+      );
+      try { execSync("open .env"); } catch {}
+    }
+    console.log(`\n⚠️  Missing credentials: ${missing.join(", ")}`);
+    console.log("Set them in .env (local) or Railway environment variables.\n");
     process.exit(0);
   }
-
-  const csvPath = new URL("trades.csv", import.meta.url).pathname;
-  console.log(`\n📄 Trade log: ${csvPath}`);
-  console.log(`   Open in Google Sheets or Excel any time.\n`);
 }
 
 // ─── Config ───────────────────────────────────────────────────────────────────
